@@ -1,0 +1,35 @@
+{
+  "name": "blisp",
+  "description": "browser lisp",
+  "version": "0.0.1",
+  "homepage": "http://iantruslove.github.com/blisp/",
+  "author": {
+    "name": "Ian Truslove",
+    "email": "ian.truslove@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/iantruslove/blisp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iantruslove/blisp/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://iantruslove.github.com/blisp//blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "lib/blisp",
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "~0.3.17",
+    "grunt-jasmine-node": "~0.0.5"
+  },
+  "keywords": []
+}
