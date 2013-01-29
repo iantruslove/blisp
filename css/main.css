@@ -123,10 +123,8 @@ ul.repl {
   padding: 0;
 }
 
-ul.repl li.output {
-}
-
-li.oldInput {
+li.comment:before {
+  content: ". ";
 }
 
 li.output:before {
@@ -141,8 +139,6 @@ li.currentInput {
   background: rgba(240, 220, 250, 0.4);
   padding-left: 3px;
 }
-
-
 
 
 /* ==========================================================================

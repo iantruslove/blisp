@@ -4,33 +4,61 @@ var blisp = window.blisp || {};
 blisp.replModel = (function () {
   var model = _.extend({}, Backbone.Events),
       commands = [],
-      responses = [];
+      buildCommand, handleNewCommand;
 
-  model.addCommand = function (command) {
+  buildCommand = function (commandType, commandText) {
+    return { type: commandType, value: commandText };
+  };
+
+  handleNewCommand = function (commandType, commandText) {
+    var command = buildCommand(commandType, commandText);
     commands.push(command);
     model.trigger("newCommand", command);
   };
 
-  model.addResponse = function (response) {
-    responses.push(response);
-    model.trigger("newResponse", response);
-  }
+  model.addCommand = function (commandText) {
+    handleNewCommand("command", commandText);
+  };
+
+  model.addResponse = function (responseText) {
+    handleNewCommand("response", responseText);
+  };
+
+  model.addComment = function (commentText) {
+    handleNewCommand("comment", commentText);
+  };
 
   return model;
 }());
 
 // Controller
 blisp.replController = (function (model) {
-  var controller = {},
-      executeBlisp = function (blisp) {
-        // TODO
-        return "not yet implemented";
-      };
+  var controller = {}, executeBlisp, getHelpText;
 
-  controller.submitCode = function (code) {
-    model.addCommand(code.trim());
-    var response = executeBlisp(code);
-    model.addResponse(response);
+  executeBlisp = function (blisp) {
+    // TODO
+    return "not yet implemented";
+  };
+
+  getHelpText = function () {
+    var helpEl = document.getElementById('helpText');
+    return (helpEl ? helpEl.innerHTML : "no help available");
+  };
+
+  controller.submitCode = function (blisp) {
+    var response, code;
+    code = blisp.trim();
+
+    model.addCommand(code);
+
+    if (code === ":help") {
+      response = getHelpText();
+      model.addComment(response);
+    } else {
+      response = executeBlisp(code);
+      model.addResponse(response);
+    }
+
   };
 
   return controller;
@@ -40,33 +68,50 @@ blisp.replController = (function (model) {
 blisp.replView = (function (editorSelector, controller, model) {
   var view = {},
       $el = $(editorSelector),
-      $repl = $el.find('.repl');
+      $repl = $el.find('.repl'),
+      getNewCode, remoteLastTypedCommand, getReadyForInput,
+      onNewCommand, showNewResponse, showNewInput, showNewComment,
+      placeCaretAtEnd, setEndOfContenteditable;
 
-  var getNewCode = function() {
+  getNewCode = function() {
     return $repl.find('.currentInput').html();
   };
 
-  var remoteLastTypedCommand = function () {
+  remoteLastTypedCommand = function () {
     $repl.find('.currentInput').remove();
   };
 
-  var getReadyForInput = function () {
+  getReadyForInput = function () {
     $repl.append("<li class='currentInput' autocapitalize='off' spellcheck='false' autocorrect='off' contenteditable='true'></li>");
     var el = $repl.find('.currentInput').get(0);
     placeCaretAtEnd(el);
-
   };
 
-  var onNewResponse = function (newResponse) {
+  onNewCommand = function (command) {
+    if (command.type === "command")  {
+      showNewInput(command.value);
+    } else if (command.type === "comment") {
+      showNewComment(command.value);
+    } else if (command.type === "response") {
+      showNewResponse(command.value);
+    }
+  }
+
+  showNewResponse = function (newResponse) {
     $repl.append("<li class='output'>" + newResponse + "</li>");
     getReadyForInput();
   };
 
-  var onNewCommand = function (newCommand) {
+  showNewInput = function (newCommand) {
     $repl.append("<li class='oldInput'>" + newCommand + "</li>");
   };
 
-  function placeCaretAtEnd(el) {
+  showNewComment = function (newComment) {
+    $repl.append("<li class='comment'>" + newComment + "</li>");
+    getReadyForInput();
+  };
+
+  placeCaretAtEnd = function (el) {
     // from http://stackoverflow.com/questions/4233265/contenteditable-set-caret-at-the-end-of-the-text-cross-browser
     el.focus();
     if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
@@ -84,7 +129,7 @@ blisp.replView = (function (editorSelector, controller, model) {
     }
   }
 
-  var setEndOfContenteditable = function (contentEditableElement) {
+  setEndOfContenteditable = function (contentEditableElement) {
     // from http://stackoverflow.com/questions/1125292/how-to-move-cursor-to-end-of-contenteditable-entity/3866442#3866442
     var range,selection;
     if (document.createRange) { //Firefox, Chrome, Opera, Safari, IE 9+
@@ -103,7 +148,7 @@ blisp.replView = (function (editorSelector, controller, model) {
   }
 
   $el.keydown(function (e) {
-    if (e.ctrlKey && e.keyCode == 13) {
+    if (/*e.ctrlKey &&*/ e.keyCode == 13) {
       // Ctrl-Enter pressed
       var newCode;
       e.preventDefault();
@@ -113,7 +158,6 @@ blisp.replView = (function (editorSelector, controller, model) {
     }
   });
 
-  model.on("newResponse", onNewResponse, view);
   model.on("newCommand", onNewCommand, view);
   getReadyForInput();
 
