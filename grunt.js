@@ -1,5 +1,7 @@
 module.exports = function(grunt) {
 
+  grunt.loadNpmTasks('grunt-jasmine-node');
+
   // Project configuration.
   grunt.initConfig({
     pkg: '<json:package.json>',
@@ -22,15 +24,12 @@ module.exports = function(grunt) {
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
-    test: {
-      files: ['test/**/*.js']
-    },
     lint: {
-      files: ['grunt.js', 'lib/**/*.js', 'test/**/*.js']
+      files: ['grunt.js', 'lib/**/*.js', 'spec/**/*.js']
     },
     watch: {
       files: '<config:lint.files>',
-      tasks: 'lint test'
+      tasks: 'lint jasmine_node'
     },
     jshint: {
       options: {
@@ -47,15 +46,18 @@ module.exports = function(grunt) {
       },
       globals: {
         exports: true,
-        module: false
+        module: false,
+        describe: true,
+        it: true,
+        expect: true
       }
     },
     uglify: {},
     jasmine_node: {
-      specNameMatcher: "./spec", // load only specs containing specNameMatcher
+      spec: "./spec", // load only specs containing specNameMatcher
       projectRoot: ".",
       requirejs: false,
-      forceExit: true,
+      forceExit: false,
       jUnit: {
         report: false,
         savePath : "./build/reports/jasmine/",
@@ -65,9 +67,8 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-jasmine-node');
 
   // Default task.
-  grunt.registerTask('default', 'lint jasmine_node test concat min');
+  grunt.registerTask('default', 'lint jasmine_node concat min');
 
 };

@@ -29,7 +29,11 @@
   },
   "devDependencies": {
     "grunt": "~0.3.17",
-    "grunt-jasmine-node": "~0.0.5"
+    "grunt-jasmine-node": "~0.0.5",
+    "grunt-contrib-watch": "~0.1.4"
   },
-  "keywords": []
+  "keywords": [],
+  "dependencies": {
+    "escodegen": "0.0.15"
+  }
 }
