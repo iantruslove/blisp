@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-jasmine-node');
+  grunt.loadNpmTasks('grunt-contrib-coffee');
 
   // Project configuration.
   grunt.initConfig({
@@ -25,11 +26,17 @@ module.exports = function(grunt) {
       }
     },
     lint: {
-      files: ['grunt.js', 'lib/**/*.js', 'spec/**/*.js']
+      files: ['grunt.js', 'lib/**/*.js', 'spec/**/*.js', 'generated_spec/**/*.js']
     },
     watch: {
-      files: '<config:lint.files>',
-      tasks: 'lint jasmine_node'
+      dev: {
+        files: '<config:lint.files>',
+        tasks: 'lint jasmine_node'
+      },
+      coffee: {
+        files: '**/*.coffee',
+        tasks: 'coffee'
+      }
     },
     jshint: {
       options: {
@@ -45,6 +52,7 @@ module.exports = function(grunt) {
         eqnull: true
       },
       globals: {
+        require: true,
         exports: true,
         module: false,
         describe: true,
@@ -53,8 +61,18 @@ module.exports = function(grunt) {
       }
     },
     uglify: {},
+    coffee: {
+      spec: {
+        files: {
+          'generated_spec/*.js': 'spec/**/*.coffee'
+        },
+        options: {
+          bare: false
+        }
+      }
+    },
     jasmine_node: {
-      spec: "./spec", // load only specs containing specNameMatcher
+      spec: ["./spec", './generated_spec'], // load only specs containing specNameMatcher
       projectRoot: ".",
       requirejs: false,
       forceExit: false,
