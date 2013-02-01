@@ -52,12 +52,14 @@ module.exports = function(grunt) {
         eqnull: true
       },
       globals: {
+        console: true,
         require: true,
         exports: true,
         module: false,
         describe: true,
         it: true,
-        expect: true
+        expect: true,
+        beforeEach: true
       }
     },
     uglify: {},
