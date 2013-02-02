@@ -15,22 +15,6 @@ describe "blisp compiler", ->
   it "exposes a module", ->
     expect(blisp).toBeDefined()
 
-  it "can add two numbers", ->
-    sExp = "(+ 1 2)"
-    #TODO expect(blisp.compile(sExp)).toEqual "1+2"
-
-  describe "support for types in r6rs", ->
-    it "compiles booleans", ->
-      expect(blisp.compile values.true).toEqual "true"
-      expect(blisp.compile values.false).toEqual "false"
-
-    it "compiles numbers", ->
-      expect(blisp.compile(values.one)).toEqual "1"
-
-    it "compiles strings into strings", ->
-      aString = "'abc'"
-      expect(blisp.compile(values.string)).toEqual "'abc'"
-
 
   describe "the parser", ->
     it "can determine booleans", ->
@@ -81,21 +65,49 @@ describe "blisp compiler", ->
 
 
   describe "the abstract syntax tree generator", ->
-    it "generates the tree for a single boolean value", ->
-      expect(blisp.parser.generateSyntaxTree(values.true)).toEqual({
-        type: "ExpressionStatement",
-        expression: {
-          type: "Literal",
-          value: true
-        }})
 
-    it "generates the tree for a single integer", ->
-      expect(blisp.parser.generateSyntaxTree(values.one)).toEqual({
-        type: "ExpressionStatement",
-        expression: {
-          type: "Literal",
-          value: 1
-        }})
+    xit "is initialized with a tokenizer", ->
+      # TODO
+      return
+
+    xit "iterates over s-expressions", ->
+      # TODO
+      expect(blisp.generator.parseSExp.callCount).toEqual(2)
+
+    describe "for simple literals", ->
+      it "generates the tree for a single boolean value", ->
+        expect(blisp.generator.generateSyntaxTree("#t")).toEqual({
+          type: "ExpressionStatement",
+          expression: {
+            type: "Literal",
+            value: true
+          }})
+
+      it "generates the tree for a single integer", ->
+        expect(blisp.generator.generateSyntaxTree("4")).toEqual({
+          type: "ExpressionStatement",
+          expression: {
+            type: "Literal",
+            value: 4
+          }})
+
+    describe "for a simple s-exp", ->
+      # TODO
+      xit "parses a simlpe s-exp", ->
+        expect(blisp.generator.generateSyntaxTree("(+ 1 2)")).toEqual({
+          type: "ExpressionStatement",
+          expression: {
+            type: "BinaryExpression",
+            operator: "+",
+            left: {
+              type: "Literal",
+              value: 1
+            },
+            right: {
+              type: "Literal",
+              value: 2
+            }
+          }})
 
 
   describe "the tokenizer", ->
