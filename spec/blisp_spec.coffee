@@ -73,37 +73,18 @@ describe "blisp compiler", ->
             }
           }})
 
-  describe "the Token", ->
-    it "provides access to the original blisp string", ->
-      token = new blisp.Token "1"
-      expect(token.blisp()).toEqual "1"
 
   describe "the BooleanToken", ->
-    it "is a Token", ->
-      booleanToken = new blisp.BooleanToken(values.true)
-      expect(booleanToken instanceof blisp.Token).toBeTruthy()
-      expect(booleanToken instanceof blisp.BooleanToken).toBeTruthy()
-
     it "correctly parses the data as a boolean", ->
       expect(new blisp.BooleanToken(values.true).parse()).toEqual { type: "Literal", value: true }
       expect(new blisp.BooleanToken(values.false).parse()).toEqual { type: "Literal", value: false }
 
   describe "the NumberToken", ->
-    it "is a Token", ->
-      numberToken = new blisp.NumberToken(values.true)
-      expect(numberToken instanceof blisp.Token).toBeTruthy()
-      expect(numberToken instanceof blisp.NumberToken).toBeTruthy()
-
     it "correctly parses the data as a number", ->
       expect(new blisp.NumberToken(values.one).parse()).toEqual { type: "Literal", value: 1 }
       expect(new blisp.NumberToken(values.two).parse()).toEqual { type: "Literal", value: 2 }
 
   describe "the BinaryExpressionToken", ->
-    it "is a Token", ->
-      binaryExpressionToken = new blisp.BinaryExpressionToken(values.true)
-      expect(binaryExpressionToken instanceof blisp.Token).toBeTruthy()
-      expect(binaryExpressionToken instanceof blisp.BinaryExpressionToken).toBeTruthy()
-
     it "correctly parses the data as a number", ->
       expect(new blisp.BinaryExpressionToken("+").parse()).toEqual {
         type: "BinaryExpression",
@@ -113,11 +94,6 @@ describe "blisp compiler", ->
       }
 
   describe "the ExpressionStatementStartToken", ->
-    it "is a Token", ->
-      token = new blisp.ExpressionStatementStartToken("(")
-      expect(token instanceof blisp.Token).toBeTruthy()
-      expect(token instanceof blisp.ExpressionStatementStartToken).toBeTruthy()
-
     it "parses to an empty object", ->
       expect(new blisp.ExpressionStatementStartToken("(").parse()).toEqual {}
 
@@ -128,47 +104,45 @@ describe "blisp compiler", ->
 
     it "begets Tokens and Tokenizers", ->
       tokenizer = blisp.createTokenizer "(+ 1 2)"
-      expect(tokenizer.first() instanceof blisp.Token).toBeTruthy()
       expect(tokenizer.first() instanceof blisp.ExpressionStatementStartToken).toBeTruthy()
       expect(tokenizer.rest() instanceof blisp.Tokenizer).toBeTruthy()
       expect(tokenizer.rest().first() instanceof blisp.BinaryExpressionToken).toBeTruthy()
 
     it "tokenizes a number", ->
       tokenizer = blisp.createTokenizer values.one
-      expect(tokenizer.first().blisp()).toEqual values.one
+      expect(tokenizer.first().token).toEqual values.one
       expect(tokenizer.rest()).toBeNull()
 
     it "tokenizes a number with leading and trailing white space", ->
       tokenizer = blisp.createTokenizer " 1  "
-      expect(tokenizer.first().blisp()).toEqual "1"
+      expect(tokenizer.first().token).toEqual "1"
       expect(tokenizer.rest()).toBeNull()
 
     it "tokenizes an opening paren", ->
       tokenizer = blisp.createTokenizer "( "
-      expect(tokenizer.first().blisp()).toEqual "("
+      expect(tokenizer.first().token).toEqual "("
       expect(tokenizer.rest()).toBeNull()
 
     it "tokenizes a simple expression", ->
       tokenizer = blisp.createTokenizer "( 1 )"
-      expect(tokenizer.first().blisp()).toEqual "("
+      expect(tokenizer.first().token).toEqual "("
       expect(tokenizer.rest()).not.toBeNull()
-      expect(tokenizer.rest().first().blisp()).toEqual "1"
-      expect(tokenizer.rest().rest().first().blisp()).toEqual ")"
+      expect(tokenizer.rest().first().token).toEqual "1"
+      expect(tokenizer.rest().rest().first().token).toEqual ")"
       expect(tokenizer.rest().rest().rest()).toBeNull
 
     it "tokenizes a simple expression with no spacing after paren", ->
       tokenizer = blisp.createTokenizer "(1 )"
-      expect(tokenizer.first().blisp()).toEqual "("
+      expect(tokenizer.first().token).toEqual "("
       expect(tokenizer.rest()).not.toBeNull()
-      expect(tokenizer.rest().first().blisp()).toEqual "1"
-      expect(tokenizer.rest().rest().first().blisp()).toEqual ")"
+      expect(tokenizer.rest().first().token).toEqual "1"
+      expect(tokenizer.rest().rest().first().token).toEqual ")"
 
     it "tokenizes a simple expression with no spacing before trailing paren", ->
       tokenizer = blisp.createTokenizer "( 1)"
-      expect(tokenizer.first().blisp()).toEqual "("
+      expect(tokenizer.first().token).toEqual "("
       expect(tokenizer.rest()).not.toBeNull()
-      expect(tokenizer.rest().first().blisp()).toEqual "1"
+      expect(tokenizer.rest().first().token).toEqual "1"
       expect(tokenizer.rest().rest()).not.toBeNull()
-      expect(tokenizer.rest().rest().first().blisp()).toEqual ")"
-
+      expect(tokenizer.rest().rest().first().token).toEqual ")"
 
