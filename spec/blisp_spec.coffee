@@ -23,46 +23,18 @@ describe "blisp compiler", ->
       expect(blisp.parser.isBoolean values.false).toBe true
       expect(blisp.parser.isBoolean values.one).toBe false
 
-    it "parses booleans", ->
-      expect(blisp.parser.parseBoolean(values.true)).toEqual { type: "Literal", value: true }
-      expect(blisp.parser.parseBoolean(values.false)).toEqual { type: "Literal", value: false }
-
     it "can determine that integers are numbers", ->
       expect(blisp.parser.isNumber values.one).toBe true
       expect(blisp.parser.isNumber values.false).toBe false
 
-    it "can parse integer numbers", ->
-      expect(blisp.parser.parseNumber values.one).toEqual { type: "Literal", value: 1 }
-      expect(blisp.parser.parseNumber values.two).toEqual { type: "Literal", value: 2 }
-
     it "can determine addition binary operator", ->
       expect(blisp.parser.isBinaryOperation "+").toBe true
-
-    it "can parse the addition binary operator", ->
-      expect(blisp.parser.parseBinaryOperation "+").toEqual({
-        type: "BinaryExpression",
-        operator: "+",
-        left: null,
-        right: null
-      })
 
     it "can determine an opening paren", ->
       expect(blisp.parser.isStartParen "(").toBe true
 
-    it "can parse an opening paren", ->
-      expect(blisp.parser.parseStartParen "(").toEqual({
-        type: "ExpressionStatement", 
-        expression: null
-      })
-
     it "can determine a closing paren", ->
       expect(blisp.parser.isClosingParen ")").toBe true
-
-    it "can parse any literal", ->
-      expect(blisp.parser.parseToken values.one).toEqual { type: "Literal", value: 1 }
-      expect(blisp.parser.parseToken values.false).toEqual { type: "Literal", value: false }
-      expect(blisp.parser.parseToken "+").toEqual { type: "BinaryExpression", operator: "+", left: null, right: null }
-      expect(blisp.parser.parseToken "(").toEqual { type: "ExpressionStatement", expression: null }
 
 
   describe "the abstract syntax tree generator", ->
@@ -106,13 +78,48 @@ describe "blisp compiler", ->
       token = new blisp.Token "1"
       expect(token.blisp()).toEqual "1"
 
-    it "parses the token string", ->
-      token = new blisp.Token "6"
-      expect(token.parse()).toEqual({
-        type: "Literal",
-        value: 6
-      })
+  describe "the BooleanToken", ->
+    it "is a Token", ->
+      booleanToken = new blisp.BooleanToken(values.true)
+      expect(booleanToken instanceof blisp.Token).toBeTruthy()
+      expect(booleanToken instanceof blisp.BooleanToken).toBeTruthy()
 
+    it "correctly parses the data as a boolean", ->
+      expect(new blisp.BooleanToken(values.true).parse()).toEqual { type: "Literal", value: true }
+      expect(new blisp.BooleanToken(values.false).parse()).toEqual { type: "Literal", value: false }
+
+  describe "the NumberToken", ->
+    it "is a Token", ->
+      numberToken = new blisp.NumberToken(values.true)
+      expect(numberToken instanceof blisp.Token).toBeTruthy()
+      expect(numberToken instanceof blisp.NumberToken).toBeTruthy()
+
+    it "correctly parses the data as a number", ->
+      expect(new blisp.NumberToken(values.one).parse()).toEqual { type: "Literal", value: 1 }
+      expect(new blisp.NumberToken(values.two).parse()).toEqual { type: "Literal", value: 2 }
+
+  describe "the BinaryExpressionToken", ->
+    it "is a Token", ->
+      binaryExpressionToken = new blisp.BinaryExpressionToken(values.true)
+      expect(binaryExpressionToken instanceof blisp.Token).toBeTruthy()
+      expect(binaryExpressionToken instanceof blisp.BinaryExpressionToken).toBeTruthy()
+
+    it "correctly parses the data as a number", ->
+      expect(new blisp.BinaryExpressionToken("+").parse()).toEqual {
+        type: "BinaryExpression",
+        operator: "+",
+        left: null,
+        right: null
+      }
+
+  describe "the ExpressionStatementStartToken", ->
+    it "is a Token", ->
+      token = new blisp.ExpressionStatementStartToken("(")
+      expect(token instanceof blisp.Token).toBeTruthy()
+      expect(token instanceof blisp.ExpressionStatementStartToken).toBeTruthy()
+
+    it "parses to an empty object", ->
+      expect(new blisp.ExpressionStatementStartToken("(").parse()).toEqual {}
 
   describe "the Tokenizer", ->
     it "creates instances of Tokenizer", ->
@@ -122,7 +129,9 @@ describe "blisp compiler", ->
     it "begets Tokens and Tokenizers", ->
       tokenizer = blisp.createTokenizer "(+ 1 2)"
       expect(tokenizer.first() instanceof blisp.Token).toBeTruthy()
+      expect(tokenizer.first() instanceof blisp.ExpressionStatementStartToken).toBeTruthy()
       expect(tokenizer.rest() instanceof blisp.Tokenizer).toBeTruthy()
+      expect(tokenizer.rest().first() instanceof blisp.BinaryExpressionToken).toBeTruthy()
 
     it "tokenizes a number", ->
       tokenizer = blisp.createTokenizer values.one
