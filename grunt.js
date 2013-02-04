@@ -2,7 +2,10 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-jasmine-node');
   grunt.loadNpmTasks('grunt-contrib-coffee');
-  grunt.loadNpmTasks('grunt-contrib-watch');
+  //grunt.loadNpmTasks('grunt-contrib-watch'); // Sometimes, the watch tasks are erratic.  Try uncomenting this line.
+
+  // Default task.
+  grunt.registerTask('default', 'lint jasmine_node concat min');
 
   // Project configuration.
   grunt.initConfig({
@@ -49,6 +52,7 @@ module.exports = function(grunt) {
         eqnull: true
       },
       globals: {
+        define: true,
         console: true,
         require: true,
         exports: true,
@@ -86,7 +90,5 @@ module.exports = function(grunt) {
   });
 
 
-  // Default task.
-  grunt.registerTask('default', 'lint jasmine_node concat min');
 
 };
