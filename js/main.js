@@ -1,7 +1,7 @@
-var blisp = window.blisp || {};
+var blispRepl = window.blispRepl || {};
 
 // Model
-blisp.replModel = (function () {
+blispRepl.replModel = (function () {
   var model = _.extend({}, Backbone.Events),
       commands = [],
       buildCommand, handleNewCommand;
@@ -32,10 +32,10 @@ blisp.replModel = (function () {
 }());
 
 // Controller
-blisp.replController = (function (model) {
+blispRepl.replController = (function (model) {
   var controller = {}, executeBlisp, getHelpText;
 
-  executeBlisp = function (blisp) {
+  executeBlisp = function (blispCode) {
     // TODO
     return "not yet implemented";
   };
@@ -45,9 +45,9 @@ blisp.replController = (function (model) {
     return (helpEl ? helpEl.innerHTML : "no help available");
   };
 
-  controller.submitCode = function (blisp) {
+  controller.submitCode = function (blispCode) {
     var response, code;
-    code = blisp.trim();
+    code = blispCode.trim();
 
     model.addCommand(code);
 
@@ -62,10 +62,10 @@ blisp.replController = (function (model) {
   };
 
   return controller;
-}(blisp.replModel));
+}(blispRepl.replModel));
 
 // View
-blisp.replView = (function (editorSelector, controller, model) {
+blispRepl.replView = (function (editorSelector, controller, model) {
   var view = {},
       $el = $(editorSelector),
       $repl = $el.find('.repl'),
@@ -162,8 +162,6 @@ blisp.replView = (function (editorSelector, controller, model) {
   getReadyForInput();
 
   return view;
-}('.blispInput', blisp.replController, blisp.replModel));
-
-
+}('.blispInput', blispRepl.replController, blispRepl.replModel));
 
 
