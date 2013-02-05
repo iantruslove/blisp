@@ -1,4 +1,4 @@
-/*! blisp - v0.0.1 - 2013-02-04
+/*! blisp - v0.0.2 - 2013-02-04
 * http://iantruslove.github.com/blisp/
 * Copyright (c) 2013 Ian Truslove; Licensed MIT */
 
