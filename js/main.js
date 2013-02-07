@@ -38,7 +38,7 @@ require(['blisp', 'escodegen'], function(blisp, escodegen) {
     var controller = {}, executeBlisp, getHelpText;
 
     executeBlisp = function (blispCode) {
-      return eval(escodegen.generate(blisp.generator.generateStatement(blispCode)));
+      return eval(escodegen.generate(blisp.generator.generate(blispCode)));
     };
 
     getHelpText = function () {

@@ -1,4 +1,4 @@
-/*! blisp - v0.0.2 - 2013-02-04
+/*! blisp - v0.0.3 - 2013-02-06
 * http://iantruslove.github.com/blisp/
 * Copyright (c) 2013 Ian Truslove; Licensed MIT */
 
@@ -31,7 +31,7 @@
       return (value.match(/[^0-9]/) === null);
     },
     isBinaryOperation: function(value) {
-      return (value === "+");
+      return (value.match(/^[+-\/\*]$/) !== null);
     },
     isStartParen: function(value) {
       return (value === "(");
@@ -55,10 +55,9 @@
   };
 
   generator = {
-    // reads a single blisp statement from the start of the code provided,
-    // and returns escodegen-compatible AST string.
-    generateStatement: function (blispCode) {
-      var expressionStatement, value, firstToken, tokenizer;
+    // reads blisp statements and returns escodegen-compatible AST string.
+    generate: function (blispCode) {
+      var expressionStatement, tokenizer, generatedCode;
 
       expressionStatement = {
         type: "ExpressionStatement",
@@ -67,21 +66,48 @@
 
       tokenizer = (blispCode instanceof Tokenizer ? blispCode : new Tokenizer(blispCode));
 
-      firstToken = tokenizer.first();
-      console.log("Parsed first token " + blispCode + " as " + JSON.stringify(firstToken.parse, null, 4));
+      generatedCode = generator.rGenerate(tokenizer);
 
-      if (firstToken instanceof ExpressionStatementStartToken) {
+      expressionStatement.expression = generatedCode.astFragment;
+      return expressionStatement;
+    },
+
+
+    rGenerate: function (tokenizer) {
+      var token,
+          firstParamData, secondParamData,
+          thingToReturn = {};
+
+      token = tokenizer.first();
+
+      if (token instanceof ExpressionStatementStartToken) {
+        thingToReturn.astFragment = {};
+
+        // operator
         tokenizer = tokenizer.rest();
-        expressionStatement.expression = tokenizer.first().parse();
+        thingToReturn.astFragment = tokenizer.first().parse();
+
+        // first param
         tokenizer = tokenizer.rest();
-        expressionStatement.expression.left = tokenizer.first().parse();
+        firstParamData = generator.rGenerate(tokenizer);
+        thingToReturn.astFragment.left = firstParamData.astFragment;
+        tokenizer = firstParamData.tokenizer;
+
+        // second param
         tokenizer = tokenizer.rest();
-        expressionStatement.expression.right = tokenizer.first().parse();
+        secondParamData = generator.rGenerate(tokenizer);
+        thingToReturn.astFragment.right = secondParamData.astFragment;
+        tokenizer = secondParamData.tokenizer;
+
+        // closing paren
+        tokenizer = tokenizer.rest();
+
       } else {
-        expressionStatement.expression = firstToken.parse();
+        thingToReturn.astFragment = token.parse();
       }
 
-      return expressionStatement;
+      thingToReturn.tokenizer = tokenizer;
+      return thingToReturn;
     }
   };
 
@@ -132,8 +158,10 @@
   };
 
   Tokenizer = function (code) {
-    var untokenizedString = code.trimLeft(),
-        matchedTerms = untokenizedString.match(/^(\(|\)|(?:[^\s()]+))(.*)$/);
+    var matchedTerms;
+
+    this.untokenizedString = code.trimLeft();
+    matchedTerms = this.untokenizedString.match(/^(\(|\)|(?:[^\s()]+))(.*)$/);
 
     this.firstToken = (matchedTerms !== null ? matchedTerms[1] : "");
     this.restOfTokens = (matchedTerms !== null ? matchedTerms[2] : "");
@@ -150,6 +178,10 @@
       return null;
     }
     return new Tokenizer(this.restOfTokens);
+  };
+
+  Tokenizer.prototype.getCode = function () {
+    return this.untokenizedString;
   };
 
   createTokenizer = function(code) {
