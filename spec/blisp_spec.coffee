@@ -1,5 +1,6 @@
 blisp = require '../lib/blisp.js'
 sinon = require 'sinon'
+escodegen = require 'escodegen'
 
 describe "blisp compiler", ->
 
@@ -41,7 +42,7 @@ describe "blisp compiler", ->
 
     describe "for simple literals", ->
       it "generates the tree for a single boolean value", ->
-        expect(blisp.generator.generateStatement("#t")).toEqual({
+        expect(blisp.generator.generate("#t")).toEqual({
           type: "ExpressionStatement",
           expression: {
             type: "Literal",
@@ -49,7 +50,7 @@ describe "blisp compiler", ->
           }})
 
       it "generates the tree for a single integer", ->
-        expect(blisp.generator.generateStatement("4")).toEqual({
+        expect(blisp.generator.generate("4")).toEqual({
           type: "ExpressionStatement",
           expression: {
             type: "Literal",
@@ -57,22 +58,45 @@ describe "blisp compiler", ->
           }})
 
     describe "for a simple s-exp", ->
-      it "parses a simlpe s-exp", ->
-        expect(blisp.generator.generateStatement("(+ 1 2)")).toEqual({
+      it "parses a simple s-exp", ->
+        expect(blisp.generator.generate("(+ 12 24)")).toEqual({
           type: "ExpressionStatement",
           expression: {
             type: "BinaryExpression",
             operator: "+",
             left: {
               type: "Literal",
-              value: 1
+              value: 12
             },
             right: {
               type: "Literal",
-              value: 2
+              value: 24
             }
           }})
 
+      it "parses a nested s-exp", ->
+        expect(blisp.generator.generate("(+ (+ 10 11) 24)")).toEqual({
+          type: "ExpressionStatement",
+          expression: {
+            type: "BinaryExpression",
+            operator: "+",
+            left: {
+              type: "BinaryExpression",
+              operator: "+",
+              left: {
+                type: "Literal",
+                value: 10
+              },
+              right: {
+                type: "Literal",
+                value: 11
+              }
+            },
+            right: {
+              type: "Literal",
+              value: 24
+            }
+          }})
 
   describe "the BooleanToken", ->
     it "correctly parses the data as a boolean", ->
@@ -107,6 +131,10 @@ describe "blisp compiler", ->
       expect(tokenizer.first() instanceof blisp.ExpressionStatementStartToken).toBeTruthy()
       expect(tokenizer.rest() instanceof blisp.Tokenizer).toBeTruthy()
       expect(tokenizer.rest().first() instanceof blisp.BinaryExpressionToken).toBeTruthy()
+
+    it "provides access to the code", ->
+      tokenizer = blisp.createTokenizer "(+ 1 2)"
+      expect(tokenizer.getCode()).toEqual "(+ 1 2)"
 
     it "tokenizes a number", ->
       tokenizer = blisp.createTokenizer values.one
