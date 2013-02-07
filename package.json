@@ -1,7 +1,7 @@
 {
   "name": "blisp",
   "description": "browser lisp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "http://iantruslove.github.com/blisp/",
   "author": {
     "name": "Ian Truslove",
