@@ -33,7 +33,8 @@
     "grunt-contrib-watch": "~0.1.4",
     "grunt-contrib-coffee": "~0.3.2",
     "sinon": "~1.5.2",
-    "jasmine-matchers": "~0.1.1"
+    "jasmine-matchers": "~0.1.1",
+    "jasmine-node": "~1.2.3"
   },
   "keywords": [],
   "dependencies": {

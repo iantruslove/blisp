@@ -29,6 +29,10 @@ Look at this code running live at http://iantruslove.github.com/blisp/
 => 14
 ```
 
+## References
+
+* [R6RS](http://www.r6rs.org/) - the Scheme language spec
+
 
 ## License
 Copyright (c) 2013 Ian Truslove  
