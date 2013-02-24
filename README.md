@@ -33,6 +33,11 @@ Look at this code running live at http://iantruslove.github.com/blisp/
 
 * [R6RS](http://www.r6rs.org/) - the Scheme language spec
 
+## Changelog
+
+* 0.0.4
+  * Switched all modules to strict AMD
+
 
 ## License
 Copyright (c) 2013 Ian Truslove  
