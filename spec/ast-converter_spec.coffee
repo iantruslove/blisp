@@ -16,7 +16,7 @@ describe "the ast-converter", ->
     expect(converter.convertExpressionStatement).toBeDefined()
 
 
-  describe "expression statement converter", ->
+  describe "overall expression statement converter", ->
     it "converts simple boolean expressions", ->
       blispAst = {
         type: "ExpressionStatement",
@@ -33,6 +33,7 @@ describe "the ast-converter", ->
       expect(converter.convertExpressionStatement blispAst).toEqual jsAst
 
 
+    # TODO: Need to have list converter actually convert the elements
     it "converts list-based expressions", ->
       blispAst = {
         type: "ExpressionStatement",
@@ -67,42 +68,52 @@ describe "the ast-converter", ->
               name: "parseInt"
             },
             'arguments': [
-              {
-                type: "Literal",
-                value: "a"
-              },
-              {
-                type: "Literal",
-                value: 16 } ] } }
+              { type: "Literal", value: "a" },
+              { type: "Literal", value: 16 }
+            ] } }
 
       expect(converter.convertExpressionStatement blispAst).toEqual jsAst
 
-  describe "basic type converters", ->
-    describe "boolean converter", ->
-      it "converts true boolean values", ->
-        blispAst = {
-            type: "Boolean",
-            value: "#t" }
-        jsAst = {
+  describe "list converters", ->
+    it "can convert a single-item list", ->
+      blispAst = {
+        type: "List",
+        car: {
+          type: "Boolean",
+          value: "#t"
+        },
+        cdr: {
+          type: "EmptyList" }}
+      jsAst = {
+        type: "ArrayExpression",
+        elements: [ {
             type: "Literal",
-            value: true }
-        expect(converter.convertBoolean blispAst).toEqual jsAst
+            value: true } ] }
+      expect(converter.listConverters.convertList blispAst).toEqual jsAst
 
-      it "converts false boolean values", ->
-        blispAst = {
+    it "can convert a two-item list", ->
+      blispAst = {
+        type: "List",
+        car: {
+          type: "Boolean",
+          value: "#t"
+        },
+        cdr: {
+          type: "List"
+          car: {
             type: "Boolean",
-            value: "#f" }
-        jsAst = {
-            type: "Literal",
-            value: false }
+            value: "#f"
+          },
+          cdr: {
+            type: "EmptyList" }}}
+      jsAst = {
+        type: "ArrayExpression",
+        elements: [
+          { type: "Literal", value: true },
+          { type: "Literal", value: false }
+        ] }
+      expect(converter.listConverters.convertList blispAst).toEqual jsAst
 
-        expect(converter.convertBoolean blispAst).toEqual jsAst
-
-      it "throws an error if the type is incorrect", ->
-        expect(-> converter.convertBoolean { type: "Fish"}).toThrow "Incorrect type: expected Boolean"
-
-      it "throws an error if the value is not a boolean", ->
-        expect(-> converter.convertBoolean { type: "Boolean", value: "true"}).toThrow "Invalid value for Boolean"
 
 
 
