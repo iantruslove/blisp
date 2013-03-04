@@ -49,7 +49,7 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      files: ['*.js', 'lib/**/*.js', 'spec/**/*.js'],
+      files: ['*.js', '!scratch.js', 'lib/**/*.js', 'spec/**/*.js'],
       options: {
         curly: true,
         eqeqeq: true,
