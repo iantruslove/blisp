@@ -6,7 +6,7 @@ requirejs.config {
   nodeRequire: require
 }
 
-listConverters = requirejs './ast-converters/lists'
+listConverter = requirejs './ast-converters/list'
 
 describe "list converters", ->
   it "can convert a single-item list", ->
@@ -23,7 +23,7 @@ describe "list converters", ->
       elements: [ {
           type: "Literal",
           value: true } ] }
-    expect(listConverters.convertList blispAst).toEqual jsAst
+    expect(listConverter.convertList blispAst).toEqual jsAst
 
   it "can convert a two-item list", ->
     blispAst = {
@@ -46,7 +46,7 @@ describe "list converters", ->
         { type: "Literal", value: true },
         { type: "Literal", value: false }
       ] }
-    expect(listConverters.convertList blispAst).toEqual jsAst
+    expect(listConverter.convertList blispAst).toEqual jsAst
 
 
 

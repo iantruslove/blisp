@@ -6,19 +6,19 @@ requirejs.config {
   nodeRequire: require
 }
 
-valueConverters = requirejs './ast-converters/values'
+valueConverter = requirejs './ast-converters/value'
 
 describe "basic value converters", ->
 
   describe "the value converter facade", ->
     it "converts numbers", ->
-      expect(valueConverters.convert { type: "Number", value: 12 }).toEqual { type: "Literal", value: 12 }
+      expect(valueConverter.convert { type: "Number", value: 12 }).toEqual { type: "Literal", value: 12 }
 
     it "converts strings", ->
-      expect(valueConverters.convert { type: "String", value: "hi" }).toEqual { type: "Literal", value: "hi" }
+      expect(valueConverter.convert { type: "String", value: "hi" }).toEqual { type: "Literal", value: "hi" }
 
     it "converts booleans", ->
-      expect(valueConverters.convert { type: "Boolean", value: "#f" }).toEqual { type: "Literal", value: false }
+      expect(valueConverter.convert { type: "Boolean", value: "#f" }).toEqual { type: "Literal", value: false }
 
 
   describe "number converter", ->
@@ -31,13 +31,13 @@ describe "basic value converters", ->
         type: "Literal"
         value: 123
       }
-      expect(valueConverters.convertNumber blispAst).toEqual jsAst
+      expect(valueConverter.convertNumber blispAst).toEqual jsAst
 
     it "throws an error if the type is incorrect", ->
-      expect(-> valueConverters.convertNumber { type: "Boolean"}).toThrow "Incorrect type: expected Number"
+      expect(-> valueConverter.convertNumber { type: "Boolean"}).toThrow "Incorrect type: expected Number"
 
     it "throws an error if the value is not a string", ->
-      expect(-> valueConverters.convertNumber { type: "Number", value: "2"}).toThrow "Invalid value for Number"
+      expect(-> valueConverter.convertNumber { type: "Number", value: "2"}).toThrow "Invalid value for Number"
 
   describe "string converter", ->
     it "converts strings", ->
@@ -49,13 +49,13 @@ describe "basic value converters", ->
         type: "Literal"
         value: "str"
       }
-      expect(valueConverters.convertString blispAst).toEqual jsAst
+      expect(valueConverter.convertString blispAst).toEqual jsAst
 
     it "throws an error if the type is incorrect", ->
-      expect(-> valueConverters.convertString { type: "Boolean"}).toThrow "Incorrect type: expected String"
+      expect(-> valueConverter.convertString { type: "Boolean"}).toThrow "Incorrect type: expected String"
 
     it "throws an error if the value is not a string", ->
-      expect(-> valueConverters.convertString { type: "String", value: 1234}).toThrow "Invalid value for String"
+      expect(-> valueConverter.convertString { type: "String", value: 1234}).toThrow "Invalid value for String"
 
 
   describe "boolean converter", ->
@@ -66,7 +66,7 @@ describe "basic value converters", ->
       jsAst = {
           type: "Literal",
           value: true }
-      expect(valueConverters.convertBoolean blispAst).toEqual jsAst
+      expect(valueConverter.convertBoolean blispAst).toEqual jsAst
 
     it "converts false boolean values", ->
       blispAst = {
@@ -76,12 +76,12 @@ describe "basic value converters", ->
           type: "Literal",
           value: false }
 
-      expect(valueConverters.convertBoolean blispAst).toEqual jsAst
+      expect(valueConverter.convertBoolean blispAst).toEqual jsAst
 
     it "throws an error if the type is incorrect", ->
-      expect(-> valueConverters.convertBoolean { type: "String"}).toThrow "Incorrect type: expected Boolean"
+      expect(-> valueConverter.convertBoolean { type: "String"}).toThrow "Incorrect type: expected Boolean"
 
     it "throws an error if the value is not a boolean", ->
-      expect(-> valueConverters.convertBoolean { type: "Boolean", value: "true"}).toThrow "Invalid value for Boolean"
+      expect(-> valueConverter.convertBoolean { type: "Boolean", value: "true"}).toThrow "Invalid value for Boolean"
 
 
