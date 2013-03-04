@@ -33,7 +33,6 @@ describe "the ast-converter", ->
       expect(converter.convertExpressionStatement blispAst).toEqual jsAst
 
 
-    # TODO: Need to have list converter actually convert the elements
     it "converts list-based expressions", ->
       blispAst = {
         type: "ExpressionStatement",
@@ -73,47 +72,4 @@ describe "the ast-converter", ->
             ] } }
 
       expect(converter.convertExpressionStatement blispAst).toEqual jsAst
-
-  describe "list converters", ->
-    it "can convert a single-item list", ->
-      blispAst = {
-        type: "List",
-        car: {
-          type: "Boolean",
-          value: "#t"
-        },
-        cdr: {
-          type: "EmptyList" }}
-      jsAst = {
-        type: "ArrayExpression",
-        elements: [ {
-            type: "Literal",
-            value: true } ] }
-      expect(converter.listConverters.convertList blispAst).toEqual jsAst
-
-    it "can convert a two-item list", ->
-      blispAst = {
-        type: "List",
-        car: {
-          type: "Boolean",
-          value: "#t"
-        },
-        cdr: {
-          type: "List"
-          car: {
-            type: "Boolean",
-            value: "#f"
-          },
-          cdr: {
-            type: "EmptyList" }}}
-      jsAst = {
-        type: "ArrayExpression",
-        elements: [
-          { type: "Literal", value: true },
-          { type: "Literal", value: false }
-        ] }
-      expect(converter.listConverters.convertList blispAst).toEqual jsAst
-
-
-
 
