@@ -6,7 +6,7 @@ requirejs.config {
   nodeRequire: require
 }
 
-parser = requirejs './blisp-parser'
+parser = requirejs './parser'
 
 describe "the blisp parser", ->
   it "parses list expressions", ->
