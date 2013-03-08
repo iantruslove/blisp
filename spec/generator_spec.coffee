@@ -27,63 +27,33 @@ describe "the abstract syntax tree generator", ->
         }})
 
   describe "for a simple s-exp", ->
-    xit "parses a simple s-exp", ->
+    it "parses a simple s-exp", ->
       expect(generator.generate("(+ 12 24)")).toEqual {
         type: "ExpressionStatement",
         expression: {
           type: "List",
           car: {
-            type: "Function",
+            type: "Function"
             value: "+"
           },
           cdr: {
             type: "List",
             car: {
-              type: "Number",
+              type: "Number"
               value: 12
             },
             cdr: {
               type: "List",
               car: {
-                type: "Number",
+                type: "Number"
                 value: 24
               },
               cdr: {
                 type: "EmptyList" } } } } }
 
     xit "parses a nested s-exp", ->
-      expect(generator.generate("(+ (+ 10 11) 24)")).toEqual({
-        type: "ExpressionStatement",
-        expression: {
-          type: "BinaryExpression",
-          operator: "+",
-          left: {
-            type: "BinaryExpression",
-            operator: "+",
-            left: {
-              type: "Literal",
-              value: 10
-            },
-            right: {
-              type: "Literal",
-              value: 11
-            }
-          },
-          right: {
-            type: "Literal",
-            value: 24
-          }
-        }})
+      expect(generator.generate("(+ (+ 10 11) 24)")).toEqual { }
 
-  describe "its recursive list parser", ->
-    describe "when parsing the special case of a zero item list", ->
-      it "parses the special case of an empty list", ->
-        expect(generator.parseList("()").ast).toEqual {
-          type: "List",
-          car: {
-            type: "EmptyList"
-          },
-          cdr: undefined }
 
   describe "its new recursive list parser", ->
     it "parses a single item list", ->
