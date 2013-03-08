@@ -17,8 +17,19 @@ describe "blisp compiler", ->
   it "has a method to generate moz parser AST", ->
     expect(blisp.generate).toBeDefined()
 
-  xit "converts blisp to moz parser AST", ->
-    code = "(+ 32 12)"
-    ast = {}
+  it "converts blisp to moz parser AST", ->
+    code = "(+ 1 2)"
+    ast = {
+      type: "ExpressionStatement",
+      expression: {
+        type: "BinaryExpression",
+        operator: "+",
+        left: {
+          type: "Literal",
+          value: 1
+        },
+        right: {
+          type: "Literal",
+          value: 2 } } }
     expect(blisp.generate code).toEqual ast
 

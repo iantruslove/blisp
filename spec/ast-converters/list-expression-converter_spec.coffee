@@ -49,6 +49,24 @@ describe "list expression converter", ->
       expect(listExpressionConverter.convertBinaryExpression.callCount).toEqual 1
       expect(listExpressionConverter.convertCallExpression.callCount).toEqual 0
 
+  describe "testing different types of things", ->
+    plus = { type: "Function", value: "+" }
+    minus = { type: "Function", value: "-" }
+    mult = { type: "Function", value: "*" }
+    div = { type: "Function", value: "/" }
+    parseInt = { type: "Function", value: "parseInt" }
+
+    it "tests whether operations are binary operations", ->
+      expect(listExpressionConverter.isBinaryOperation(plus)).toBe true
+      expect(listExpressionConverter.isBinaryOperation(minus)).toBe true
+      expect(listExpressionConverter.isBinaryOperation(mult)).toBe true
+      expect(listExpressionConverter.isBinaryOperation(div)).toBe true
+      expect(listExpressionConverter.isBinaryOperation(parseInt)).toBe false
+
+    it "tests whether operations are call operations", ->
+      expect(listExpressionConverter.isCallOperation(div)).toBe false
+      expect(listExpressionConverter.isCallOperation(parseInt)).toBe true
+
   describe "converting different types of expressions", ->
     it "converts call expression operations", ->
       blispAst = {
