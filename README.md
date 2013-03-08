@@ -25,8 +25,14 @@ Look at this code running live at http://iantruslove.github.com/blisp/
 
 ```
 (+ (* 2 3) (- 10 (/ 4 2)))
-
 => 14
+```
+
+#### Functions
+
+```
+(parseInt "10" 2)
+=> 3
 ```
 
 ## References
@@ -35,6 +41,9 @@ Look at this code running live at http://iantruslove.github.com/blisp/
 
 ## Changelog
 
+* 0.0.5
+  * Rewrote parsing engine
+  * Added parseInt function
 * 0.0.4
   * Switched all modules to strict AMD
 
