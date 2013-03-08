@@ -6,7 +6,7 @@ requirejs.config {
   nodeRequire: require
 }
 
-listExpressionConverter = requirejs './ast-converters/list-expression'
+listExpressionConverter = requirejs './ast-converters/expression'
 
 describe "list expression converter", ->
   describe "main conversion interface", ->
@@ -90,16 +90,14 @@ describe "list expression converter", ->
             cdr: {
               type: "EmptyList" } } } }
       jsAst = {
-          type: "ExpressionStatement",
-          expression: {
-            type: "CallExpression"
-            callee: {
-              type: "Identifier",
-              name: "parseInt"
-            },
-            'arguments': [
-              { type: "Literal", value: "a" },
-              { type: "Literal", value: 16 } ] } }
+        type: "CallExpression"
+        callee: {
+          type: "Identifier",
+          name: "parseInt"
+        },
+        'arguments': [
+          { type: "Literal", value: "a" },
+          { type: "Literal", value: 16 } ] }
       expect(listExpressionConverter.convertCallExpression blispAst).toEqual jsAst
 
     it "converts binary operations", ->
@@ -125,15 +123,73 @@ describe "list expression converter", ->
               type: "EmptyList"
             } } } }
       jsAst = {
-        type: "ExpressionStatement",
-        expression: {
+        type: "BinaryExpression",
+        operator: "+",
+        left: {
+          type: "Literal",
+          value: 8
+        },
+        right: {
+          type: "Literal",
+          value: 16 } }
+      debugger
+      expect(listExpressionConverter.convertBinaryExpression blispAst).toEqual jsAst
+
+    it "converts nested binary operation expressions", ->
+      blispAst = {
+        type: "List",
+        car: {
+          type: "Function",
+          value: "+"
+        },
+        cdr: {
+          type: "List",
+          car: {
+            type: "List",
+            car: {
+              type: "Function",
+              value: "+"
+            },
+            cdr: {
+              type: "List",
+              car: {
+                type: "Number",
+                value: 10
+              },
+              cdr: {
+                type: "List",
+                car: {
+                  type: "Number",
+                  value: 11
+                },
+                cdr: {
+                  type: "EmptyList"
+                } } } },
+          cdr: {
+            type: "List",
+            car: {
+              type: "Number",
+              value: 24
+            },
+            cdr: {
+              type: "EmptyList"
+            } } } }
+      jsAst = {
+        type: "BinaryExpression",
+        operator: "+",
+        left: {
           type: "BinaryExpression",
           operator: "+",
           left: {
             type: "Literal",
-            value: 8
+            value: 10
           },
           right: {
             type: "Literal",
-            value: 16 } } }
+            value: 11
+          } },
+        right: {
+          type: "Literal",
+          value: 24 } }
       expect(listExpressionConverter.convertBinaryExpression blispAst).toEqual jsAst
+

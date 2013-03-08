@@ -18,18 +18,30 @@ describe "blisp compiler", ->
     expect(blisp.generate).toBeDefined()
 
   it "converts blisp to moz parser AST", ->
-    code = "(+ 1 2)"
-    ast = {
+    actualAst = blisp.generate "(+ (+ 1 2) 3)"
+    expectedAst = {
       type: "ExpressionStatement",
       expression: {
         type: "BinaryExpression",
         operator: "+",
         left: {
-          type: "Literal",
-          value: 1
-        },
+          type: "BinaryExpression",
+          operator: "+",
+          left: {
+            type: "Literal",
+            value: 1
+          },
+          right: {
+            type: "Literal",
+            value: 2 } },
         right: {
           type: "Literal",
-          value: 2 } } }
-    expect(blisp.generate code).toEqual ast
+          value: 3 } } }
+
+    console.log "Actual:"
+    console.log JSON.stringify actualAst, null, 2
+    console.log "Expected:"
+    console.log JSON.stringify expectedAst, null, 2
+
+    expect(actualAst).toEqual expectedAst
 

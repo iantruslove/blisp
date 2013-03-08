@@ -51,11 +51,58 @@ describe "the abstract syntax tree generator", ->
               cdr: {
                 type: "EmptyList" } } } } }
 
-    xit "parses a nested s-exp", ->
-      expect(generator.generate("(+ (+ 10 11) 24)")).toEqual { }
+    it "parses a nested s-exp", ->
+      expectedAst = {
+        type: "ExpressionStatement",
+        expression: {
+          type: "List",
+          car: {
+            type: "Function",
+            value: "+"
+          },
+          cdr: {
+            type: "List",
+            car: {
+              type: "List",
+              car: {
+                type: "Function",
+                value: "+"
+              },
+              cdr: {
+                type: "List",
+                car: {
+                  type: "Number",
+                  value: 10
+                },
+                cdr: {
+                  type: "List",
+                  car: {
+                    type: "Number",
+                    value: 11
+                  },
+                  cdr: {
+                    type: "EmptyList"
+                  }
+                }
+              }
+            },
+            cdr: {
+              type: "List",
+              car: {
+                type: "Number",
+                value: 24
+              },
+              cdr: {
+                type: "EmptyList"
+              }
+            }
+          }
+        }
+      }
+      actualAst = generator.generate("(+ (+ 10 11) 24)")
+      expect(actualAst).toEqual expectedAst
 
-
-  describe "its new recursive list parser", ->
+  describe "its recursive list parser", ->
     it "parses a single item list", ->
       expect(generator.parseRestOfList("1)").ast).toEqual {
         type: "List",
@@ -115,6 +162,38 @@ describe "the abstract syntax tree generator", ->
                 type: "EmptyList"
               }
             }
+          },
+          cdr: {
+            type: "EmptyList" } } }
+      expect(actualAst).toEqual expectedAst
+
+
+    it "parses another nested list", ->
+      actualAst = generator.parseRestOfList("(1 2) 3)").ast
+      expectedAst = {
+        type: "List",
+        car: {
+          type: "List"
+          car: {
+            type: "Number",
+            value: 1
+          },
+          cdr: {
+            type: "List",
+            car: {
+              type: "Number",
+              value: 2
+            },
+            cdr: {
+              type: "EmptyList"
+            }
+          }
+        },
+        cdr: {
+          type: "List",
+          car: {
+            type: "Number"
+            value: 3
           },
           cdr: {
             type: "EmptyList" } } }

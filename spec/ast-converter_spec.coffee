@@ -73,3 +73,23 @@ describe "the ast-converter", ->
 
       expect(converter.convertExpressionStatement blispAst).toEqual jsAst
 
+  describe "the expression statement converter delegates to the expression converter", ->
+    beforeEach ->
+      sinon.stub converter, "convertExpression"
+      return
+
+    afterEach ->
+      converter.convertExpression.restore()
+      return
+
+    it "delegates", ->
+      converter.convertExpressionStatement {}
+      expect(converter.convertExpression.callCount).toBe 1
+
+    it "wraps the response from the expression converter into a statement", ->
+      converter.convertExpression.returns { fake: "data" }
+      expect(converter.convertExpressionStatement {}).toEqual {
+        type: "ExpressionStatement",
+        expression: {
+          fake: "data" } }
+
