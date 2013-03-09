@@ -1,4 +1,4 @@
-/*! blisp - v0.0.4 - 2013-02-24
+/*! blisp - v0.0.5 - 2013-03-09
 * http://iantruslove.github.com/blisp/
 * Copyright (c) 2013 Ian Truslove; Licensed MIT */
 
@@ -6,103 +6,134 @@ define('tokens',[],function () {
 
   var exports = {};
 
-  var BooleanToken = function (token) {
+  exports.BooleanToken = function (token) {
     this.token = token;
     return this;
   };
-  BooleanToken.prototype.parse = function () {
-    if (this.token === "#t") { return { type: "Literal", value: true }; }
-    if (this.token === "#f") { return { type: "Literal", value: false }; }
+  exports.BooleanToken.prototype.parse = function () {
+    if (this.token === "#t" || this.token === "#f") {
+      return { type: "Boolean", value: this.token };
+    }
   };
 
-  var NumberToken = function (token) {
+  exports.NumberToken = function (token) {
     this.token = token;
     return this;
   };
-  NumberToken.prototype.parse = function () {
-    return { type: "Literal", value: parseInt(this.token, 10) };
+  exports.NumberToken.prototype.parse = function () {
+    return { type: "Number", value: parseInt(this.token, 10) };
   };
 
-  var BinaryExpressionToken = function (token) {
+  exports.StringToken = function (token) {
     this.token = token;
     return this;
   };
-  BinaryExpressionToken.prototype.parse = function () {
+  exports.StringToken.prototype.parse = function () {
+    var stringValue = this.token.match(/^"(.*)"$/)[1];
+    return { type: "String", value: stringValue };
+  };
+
+  exports.BinaryExpressionToken = function (token) {
+    this.token = token;
+    return this;
+  };
+  exports.BinaryExpressionToken.prototype.parse = function () {
     return {
-      type: "BinaryExpression",
-      operator: this.token,
-      left: null,
-      right: null
+      type: "Function",
+      value: this.token
     };
   };
 
-  var ExpressionStatementStartToken = function (token) {
+  exports.CallExpressionToken = function (token) {
     this.token = token;
     return this;
   };
-  ExpressionStatementStartToken.prototype.parse = function () {
-    return {};
+  exports.CallExpressionToken.prototype.parse = function () {
+    return {
+      type: "Function",
+      value: this.token
+    };
   };
 
-  var ExpressionStatementEndToken = function (token) {
+  exports.ExpressionStatementStartToken = function (token) {
     this.token = token;
     return this;
   };
-  ExpressionStatementEndToken.prototype.parse = function () {
-    return {};
+  exports.ExpressionStatementStartToken.prototype.parse = function () {
+    return {
+      type: "List",
+      car: null,
+      cdr: null
+    };
   };
 
-  exports.BooleanToken = BooleanToken;
-  exports.NumberToken = NumberToken;
-  exports.BinaryExpressionToken = BinaryExpressionToken;
-  exports.ExpressionStatementStartToken = ExpressionStatementStartToken;
-  exports.ExpressionStatementEndToken = ExpressionStatementEndToken;
+  exports.ExpressionStatementEndToken = function (token) {
+    this.token = token;
+    return this;
+  };
+  exports.ExpressionStatementEndToken.prototype.parse = function () {
+    return { type: "EmptyList" };
+  };
 
   return exports;
 });
 
 // the blisp parser module
-define('parser',['./tokens'], function(tokens) {
+define('lexer',['./tokens'], function(tokens) {
   var exports ={};
 
-  var isBoolean = exports.isBoolean = function(value) {
+  exports.isBoolean = function(value) {
     return (value === "#t" || value === "#f");
   };
 
-  var isNumber = exports.isNumber = function(value) {
+  exports.isString = function(value) {
+    // TODO: strings are a bit more complex than this...
+    return (value.match(/^".*"$/) !== null);
+  };
+
+  exports.isNumber = function(value) {
     return (value.match(/[^0-9]/) === null);
   };
 
-  var isBinaryOperation = exports.isBinaryOperation = function(value) {
+  exports.isBinaryOperation = function(value) {
     return (value.match(/^[+-\/\*]$/) !== null);
   };
 
-  var isStartParen = exports.isStartParen = function(value) {
+  exports.isCallOperation = function(value) {
+    return (value === "parseInt");
+  };
+
+  exports.isStartParen = function(value) {
     return (value === "(");
   };
 
-  var isClosingParen = exports.isClosingParen = function(value) {
+  exports.isClosingParen = function(value) {
     return (value === ")");
   };
 
   exports.createToken = function(value) {
-    if (isBoolean(value)) {
-        return new tokens.BooleanToken(value);
-    } else if (isNumber(value)) {
-        return new tokens.NumberToken(value);
-    } else if (isBinaryOperation(value)) {
-        return new tokens.BinaryExpressionToken(value);
-    } else if (isStartParen(value)) {
-        return new tokens.ExpressionStatementStartToken(value);
-    } else if (isClosingParen(value)) {
-        return new tokens.ExpressionStatementEndToken(value);
+    if (exports.isBoolean(value)) {
+      return new tokens.BooleanToken(value);
+    } else if (exports.isNumber(value)) {
+      return new tokens.NumberToken(value);
+    } else if (exports.isString(value)) {
+      return new tokens.StringToken(value);
+    } else if (exports.isBinaryOperation(value)) {
+      return new tokens.BinaryExpressionToken(value);
+    } else if (exports.isStartParen(value)) {
+      return new tokens.ExpressionStatementStartToken(value);
+    } else if (exports.isClosingParen(value)) {
+      return new tokens.ExpressionStatementEndToken(value);
+    } else if (exports.isCallOperation(value)) {
+      return new tokens.CallExpressionToken(value);
     }
+    throw new Error("Don't know how to create that type of token ("+value+")");
   };
 
   return exports;
 });
 
-define('tokenizer',['./parser'], function (parser) {
+define('tokenizer',['./lexer'], function (lexer) {
 
   var tokenizer = {};
 
@@ -119,7 +150,7 @@ define('tokenizer',['./parser'], function (parser) {
   };
 
   Tokenizer.prototype.first = function () {
-    return parser.createToken(this.firstToken.trimRight());
+    return lexer.createToken(this.firstToken.trimRight());
   };
 
   Tokenizer.prototype.rest = function () {
@@ -145,66 +176,261 @@ define('tokenizer',['./parser'], function (parser) {
 
 define('generator',['./tokenizer', './tokens'], function (tokenizerModule, tokens) {
 
-  var generator = {
-    // reads blisp statements and returns escodegen-compatible AST string.
-    generate: function (blispCode) {
-      var expressionStatement,
-          tokenizer,
-          Tokenizer = tokenizerModule.Tokenizer,
-          generatedCode;
+  var exports = {},
+      Tokenizer = tokenizerModule.Tokenizer;
 
-      expressionStatement = {
-        type: "ExpressionStatement",
-        expression: null
-      };
+  // reads blisp statements and returns escodegen-compatible AST string.
+  exports.generate  = function (blispCode) {
+    var expressionStatement,
+        tokenizer,
+        generatedCode = {};
 
-      tokenizer = (blispCode instanceof Tokenizer ? blispCode : new Tokenizer(blispCode));
+    tokenizer = (blispCode instanceof Tokenizer ? blispCode : new Tokenizer(blispCode));
 
-      generatedCode = generator.rGenerate(tokenizer);
+    if (tokenizer.first() instanceof tokens.ExpressionStatementStartToken) {
+      generatedCode = exports.parseRestOfList(tokenizer.rest());
+    } else {
+      generatedCode = exports.parseFirstToken(tokenizer);
+    }
 
-      expressionStatement.expression = generatedCode.astFragment;
-      return expressionStatement;
-    },
+    return {
+      type: "ExpressionStatement",
+      expression: generatedCode.ast
+    };
+  };
 
-    rGenerate: function (tokenizer) {
-      var token,
-          firstParamData, secondParamData,
-          thingToReturn = {};
+  // Parses the list in blispCode, consuming all that list's tokens.
+  // Returns an object containing the blispAst list representation and the tokenizer.
+  // Expects that the first paren of the first list has been removed.
+  exports.parseRestOfList = function(blispCode) {
+    var listElement = { type: "List", car: null, cdr: undefined },
+        rest,
+        tokenizer = (blispCode instanceof Tokenizer ? blispCode : new Tokenizer(blispCode));
 
-      token = tokenizer.first();
+    var a = exports.parseFirstToken(tokenizer);
+    listElement.car = a.ast;
+    tokenizer = a.tokenizer;
 
-      if (token instanceof tokens.ExpressionStatementStartToken) {
-        thingToReturn.astFragment = {};
+    if (tokenizer.first() instanceof tokens.ExpressionStatementEndToken) {
+      listElement.cdr = { type: "EmptyList" };
+      tokenizer = tokenizer.rest();
+    } else {
+      rest = exports.parseRestOfList(tokenizer);
+      listElement.cdr = rest.ast;
+      tokenizer = rest.tokenizer;
+    }
 
-        // operator
-        tokenizer = tokenizer.rest();
-        thingToReturn.astFragment = tokenizer.first().parse();
+    return { ast: listElement, tokenizer: tokenizer };
+  };
 
-        // first param
-        tokenizer = tokenizer.rest();
-        firstParamData = generator.rGenerate(tokenizer);
-        thingToReturn.astFragment.left = firstParamData.astFragment;
-        tokenizer = firstParamData.tokenizer;
-
-        // second param
-        tokenizer = tokenizer.rest();
-        secondParamData = generator.rGenerate(tokenizer);
-        thingToReturn.astFragment.right = secondParamData.astFragment;
-        tokenizer = secondParamData.tokenizer;
-
-        // closing paren
-        tokenizer = tokenizer.rest();
-
-      } else {
-        thingToReturn.astFragment = token.parse();
-      }
-
-      thingToReturn.tokenizer = tokenizer;
-      return thingToReturn;
+  // Take a single token off the tokenizer.
+  // Returns an object containing the blispAst and the tokenizer.
+  exports.parseFirstToken = function(tokenizer) {
+    if (tokenizer.first() instanceof tokens.ExpressionStatementStartToken) {
+      return exports.parseRestOfList(tokenizer.rest());
+    } else {
+      return { ast: tokenizer.first().parse(), tokenizer: tokenizer.rest() };
     }
   };
 
-  return generator;
+  return exports;
+});
+
+// Value converters - convert basic blisp AST value objects to Mozilla Parser AST
+
+define('ast-converters/value',[], function () {
+  
+
+  var exports = {};
+
+  exports.convert = function (blispAst) {
+    switch (blispAst.type) {
+      case "Boolean":
+        return convertBoolean(blispAst);
+      case "Number":
+        return convertNumber(blispAst);
+      case "String":
+        return convertString(blispAst);
+    }
+    throw new Error("Cannot convert that value");
+  };
+
+  var convertNumber = exports.convertNumber = function (blispAst) {
+    if (blispAst.type !== "Number") { throw "Incorrect type: expected Number"; }
+    if (typeof blispAst.value !== "number") { throw "Invalid value for Number"; }
+    return {
+      type: "Literal",
+      value: blispAst.value
+    };
+  };
+
+  var convertString = exports.convertString = function (blispAst) {
+    if (blispAst.type !== "String") { throw "Incorrect type: expected String"; }
+    if (typeof blispAst.value !== "string") { throw "Invalid value for String"; }
+    return {
+      type: "Literal",
+      value: blispAst.value
+    };
+  };
+
+  var convertBoolean = exports.convertBoolean = function (blispAst) {
+    if (blispAst.type !== "Boolean") { throw "Incorrect type: expected Boolean"; }
+    if (blispAst.value !== "#t" && blispAst.value !== "#f") { throw "Invalid value for Boolean"; } 
+    return {
+        type: "Literal",
+        value: blispAst.value === "#t"
+      };
+  };
+
+  return exports;
+
+});
+
+// Expression converter - convert blisp AST expressions to Mozilla Parser AST
+
+define('ast-converters/expression',
+    ['./value'],
+    function(valueConverter) {
+
+  
+
+  var exports = {};
+
+  exports.convert = function (blispAst) {
+    var ast = "NOT SET";
+    if (blispAst.type === "Boolean") {
+      ast = valueConverter.convertBoolean(blispAst);
+    } else if (blispAst.type === "List") {
+      ast = exports.convertList(blispAst);
+    } else {
+      throw new Error("Unable to convert expression");
+    }
+    return ast;
+  };
+
+  exports.flattenList = function (blispAst) {
+    var arrayAst, listElement = blispAst;
+
+    arrayAst = {
+      type: "ArrayExpression",
+      elements: [  ]
+    };
+
+    arrayAst.elements.push(valueConverter.convert(listElement.car));
+    while (listElement.cdr.type === "List") {
+      listElement = listElement.cdr;
+
+      if (exports.isLiteralValue(listElement.car)) {
+        arrayAst.elements.push(valueConverter.convert(listElement.car));
+      } else {
+        arrayAst.elements.push(exports.convert(listElement.car));
+      }
+    }
+
+    return arrayAst;
+  };
+
+
+  exports.convertList = function (blispAst) {
+    if (exports.isBinaryOperation(blispAst.car)) {
+      return exports.convertBinaryExpression(blispAst);
+    }
+
+    if (exports.isCallOperation(blispAst.car)) {
+      return exports.convertCallExpression(blispAst);
+    }
+
+    throw new Error("Don't know how to execute that function");
+  };
+
+  exports.convertCallExpression = function(blispAst) {
+    var ast = {
+      type: "CallExpression",
+      callee: {
+        type: "Identifier",
+        name: undefined
+      },
+      'arguments': []
+    };
+
+    ast.callee.name = blispAst.car.value;
+    ast['arguments'] = exports.flattenList(blispAst.cdr).elements;
+
+    return ast;
+  };
+
+  exports.isCallOperation = function(car) {
+    return (car.type === "Function" && car.value.match(/^parseInt$/) !== null);
+  };
+
+  exports.isBinaryOperation = function(car) {
+    return (car.type === "Function" && car.value.match(/^[\-\+\/\*]$/) !== null);
+  };
+
+  exports.isLiteralValue = function(car) {
+    return (car.type === "Number" || car.type === "Boolean" || car.type === "String");
+  };
+
+  exports.convertBinaryExpression = function(blispAst) {
+    var ast = {
+      type: "BinaryExpression",
+      operator: undefined,
+      left: {
+        type: "Literal",
+        value: undefined
+      },
+      right: {
+        type: "Literal",
+        value: undefined
+      }
+    };
+
+    ast.operator = blispAst.car.value;
+
+    if (exports.isLiteralValue(blispAst.cdr.car)) {
+      ast.left.value = blispAst.cdr.car.value;
+    } else {
+      ast.left = exports.convert(blispAst.cdr.car);
+    }
+
+    if (exports.isLiteralValue(blispAst.cdr.cdr.car)) {
+      ast.right.value = blispAst.cdr.cdr.car.value;
+    } else {
+      ast.right = exports.convert(blispAst.cdr.cdr.car);
+    }
+
+    return ast;
+  };
+
+  return exports;
+});
+
+
+// ast-converter
+// Converts internal list-based AST to Mozilla Parser AST (Esprima / Escodegen compatible)
+
+define('ast-converter',
+    ['./ast-converters/expression', './ast-converters/value'],
+    function(expressionConverter, valueConverter) {
+
+  var exports = {};
+
+  var wrapAstIntoExpressionStatement = function (ast) {
+    return {
+      type: "ExpressionStatement",
+      expression: ast
+    };
+  };
+
+  exports.convertExpression = function (blispAst) {
+    return expressionConverter.convert(blispAst);
+  };
+
+  exports.convertExpressionStatement = function (blispAst) {
+    return wrapAstIntoExpressionStatement(exports.convertExpression(blispAst.expression));
+  };
+
+  return exports;
 });
 
 /*
@@ -215,11 +441,11 @@ define('generator',['./tokenizer', './tokens'], function (tokenizerModule, token
  * Licensed under the MIT license.
  */
 
-define('blisp',['./generator'], function(generator) {
+define('blisp',['./generator', './ast-converter'], function(generator, converter) {
 
   var exports = {
     generate: function(blispCode) {
-      return generator.generate(blispCode);
+      return converter.convertExpressionStatement(generator.generate(blispCode));
     }
   };
 
