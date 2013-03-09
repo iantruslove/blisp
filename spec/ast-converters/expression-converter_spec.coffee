@@ -241,3 +241,46 @@ describe "list expression converter", ->
           value: 24 } }
       expect(converter.convertBinaryExpression blispAst).toEqual jsAst
 
+  describe "list flattining", ->
+    it "can flatten a single-item list", ->
+      blispAst = {
+        type: "List",
+        car: {
+          type: "Boolean",
+          value: "#t"
+        },
+        cdr: {
+          type: "EmptyList" }}
+      jsAst = {
+        type: "ArrayExpression",
+        elements: [ {
+            type: "Literal",
+            value: true } ] }
+      expect(converter.flattenList blispAst).toEqual jsAst
+
+    it "can flatten a two-item list", ->
+      blispAst = {
+        type: "List",
+        car: {
+          type: "Boolean",
+          value: "#t"
+        },
+        cdr: {
+          type: "List"
+          car: {
+            type: "Boolean",
+            value: "#f"
+          },
+          cdr: {
+            type: "EmptyList" }}}
+      jsAst = {
+        type: "ArrayExpression",
+        elements: [
+          { type: "Literal", value: true },
+          { type: "Literal", value: false }
+        ] }
+      expect(converter.flattenList blispAst).toEqual jsAst
+
+
+
+

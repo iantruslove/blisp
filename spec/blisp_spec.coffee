@@ -56,3 +56,29 @@ describe "blisp compiler", ->
             type: "Literal",
             value: 2 } ] } }
     expect(actualAst).toEqual expectedAst
+
+  it "converts binary expressions nested in call expresions", ->
+    actualAst = blisp.generate '(parseInt "10" (+ 1 1))'
+    expectedAst = {
+      type: "ExpressionStatement",
+      expression: {
+        type: "CallExpression",
+        callee: {
+          type: "Identifier",
+          name: "parseInt"
+        },
+        'arguments': [ {
+            type: "Literal",
+            value: "10"
+          }, {
+            type: "BinaryExpression",
+            operator: "+",
+            left: {
+              type: "Literal",
+              value: 1
+            },
+            right: {
+              type: "Literal",
+              value: 1 } } ] } }
+    expect(actualAst).toEqual expectedAst
+

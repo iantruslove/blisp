@@ -4,7 +4,7 @@ var expression;
 
 expression = '[1]';
 expression = '1+2+3';
-expression = 'parseInt("10", 2)';
+expression = 'parseInt("10", 1+1)';
 ast = esprima.parse(expression);
 console.log( JSON.stringify(ast, null, 2));
 generatedJs = escodegen.generate(ast);
