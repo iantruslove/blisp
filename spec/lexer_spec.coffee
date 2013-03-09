@@ -18,7 +18,7 @@ describe "the lexer", ->
       false: '#f'
       one: '1'
       two: '2'
-      string: "'abc'"
+      string: "\"abc\""
 
   it "can determine booleans", ->
     expect(lexer.isBoolean values.true).toBe true
@@ -28,6 +28,12 @@ describe "the lexer", ->
   it "can determine that integers are numbers", ->
     expect(lexer.isNumber values.one).toBe true
     expect(lexer.isNumber values.false).toBe false
+
+  it "can determine strings", ->
+    expect(lexer.isString values.string).toBe true
+
+  it "can determine call expression functions", ->
+    expect(lexer.isCallOperation "parseInt").toBe true
 
   it "can determine addition binary operator", ->
     expect(lexer.isBinaryOperation "+").toBe true

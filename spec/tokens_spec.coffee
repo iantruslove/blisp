@@ -28,11 +28,21 @@ describe "tokens", ->
       expect(new tokens.NumberToken(values.one).parse()).toEqual { type: "Number", value: 1 }
       expect(new tokens.NumberToken(values.two).parse()).toEqual { type: "Number", value: 2 }
 
+  describe "the StringToken", ->
+    it "correctly parses the string data", ->
+      expect(new tokens.StringToken('"abc"').parse()).toEqual { type: "String", value: "abc" }
+
   describe "the BinaryExpressionToken", ->
-    it "correctly parses the data as a number", ->
+    it "correctly parses the operation type", ->
       expect(new tokens.BinaryExpressionToken("+").parse()).toEqual {
         type: "Function",
         value: "+" }
+
+  describe "the CallExpressionToken", ->
+    it "correctly parses the function name", ->
+      expect(new tokens.CallExpressionToken("parseInt").parse()).toEqual {
+        type: "Function",
+        value: "parseInt" }
 
   describe "the ExpressionStatementStartToken", ->
     it "parses to an unfilled list structure", ->

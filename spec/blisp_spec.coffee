@@ -17,7 +17,7 @@ describe "blisp compiler", ->
   it "has a method to generate moz parser AST", ->
     expect(blisp.generate).toBeDefined()
 
-  it "converts blisp to moz parser AST", ->
+  it "converts nested blisp binary expressions to moz parser AST", ->
     actualAst = blisp.generate "(+ (+ 1 2) 3)"
     expectedAst = {
       type: "ExpressionStatement",
@@ -37,11 +37,22 @@ describe "blisp compiler", ->
         right: {
           type: "Literal",
           value: 3 } } }
-
-    console.log "Actual:"
-    console.log JSON.stringify actualAst, null, 2
-    console.log "Expected:"
-    console.log JSON.stringify expectedAst, null, 2
-
     expect(actualAst).toEqual expectedAst
 
+  it "converts blisp call expresions to moz parser AST", ->
+    actualAst = blisp.generate '(parseInt "10" 2)'
+    expectedAst = {
+      type: "ExpressionStatement",
+      expression: {
+        type: "CallExpression",
+        callee: {
+          type: "Identifier",
+          name: "parseInt"
+        },
+        'arguments': [ {
+            type: "Literal",
+            value: "10"
+          }, {
+            type: "Literal",
+            value: 2 } ] } }
+    expect(actualAst).toEqual expectedAst
